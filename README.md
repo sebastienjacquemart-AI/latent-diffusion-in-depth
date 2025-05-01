@@ -31,9 +31,13 @@ The formula for the forward diffusion process for a single time step: The beta-t
 
 Some more notation: alpha_t = 1 - beta_t; alpha_t = the cumulative product of all alphas from 0 until t (for example, if t=3, then alpha_t = alpha_1 * alpha_2 * alpha_3). 
 
-Then, we can re-write the formula for the entire forward diffusion process as follows (important: reparameterization trick):
+Then, we can re-write the formula for the entire forward diffusion process as follows (important: reparameterization trick is applied in step 1):
 
 <img width="814" alt="Screenshot 2025-05-01 at 12 17 39" src="https://github.com/user-attachments/assets/abe05e98-2a70-41d2-8136-d90cc1880789" />
+
+The formula for the reverse diffusion process for a single time step: 
+
+<img width="1160" alt="Screenshot 2025-05-01 at 12 21 47" src="https://github.com/user-attachments/assets/1f04f8bb-50c4-43d3-b4ff-86c52d5e338f" />
 
 ## Guide to Stable Diffusion Models
 
