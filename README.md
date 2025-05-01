@@ -3,7 +3,7 @@
 ## Guide to Diffusion Models
 
 Sources:
-- https://www.youtube.com/watch?v=HoKDTa5jHvg
+https://www.youtube.com/watch?v=HoKDTa5jHvg
 (1) https://arxiv.org/pdf/1503.03585.pdf
 (2) https://arxiv.org/pdf/2006.11239
 (3) https://arxiv.org/pdf/2102.09672.pdf
