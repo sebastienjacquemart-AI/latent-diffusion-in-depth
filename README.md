@@ -25,8 +25,15 @@ This should give a basic intuition of how diffusion models work. Now, let's get 
 
 Some basic notation: x_t = image at timestep t (x_O is the original image and x_T is the final image (that follows isotropic gaussian) where T depends on the paper); q(x_t|x_(t-1)) = the forward diffusion process: takes an image x_(t-1) and returns an image with noise added x_t; p(x_(t-1)|x_t) = the reverse diffusion process: takes an image x_t and returns a sample/image with noise removed x_(t-1). 
 
-<img width="1264" alt="Screenshot 2025-05-01 at 11 55 41" src="https://github.com/user-attachments/assets/321b6b69-b83e-4ee2-a330-25606c3c1229" />
+The formula for the forward diffusion process for a single time step: The beta-term refers to the schedule. In case of linear schedule: beta grows linearly from beta_start (f.e. 0.0001) to beta_end (f.e. 0.02). To apply X time steps, repeat the formule X times. However, there's a way to define this process in a single step. 
 
+<img width="1265" alt="Screenshot 2025-05-01 at 12 06 47" src="https://github.com/user-attachments/assets/5e0249dd-42b3-4a72-b068-ea265d5947b9" />
+
+Some more notation: alpha_t = 1 - beta_t; alpha_t = the cumulative product of all alphas from 0 until t (for example, if t=3, then alpha_t = alpha_1 * alpha_2 * alpha_3). 
+
+Then, we can re-write the formula for the entire forward diffusion process as follows (important: reparameterization trick):
+
+<img width="814" alt="Screenshot 2025-05-01 at 12 17 39" src="https://github.com/user-attachments/assets/abe05e98-2a70-41d2-8136-d90cc1880789" />
 
 ## Guide to Stable Diffusion Models
 
