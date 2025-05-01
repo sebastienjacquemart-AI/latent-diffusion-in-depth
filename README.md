@@ -1,3 +1,35 @@
+# Notes
+
+## Guide to Diffusion Models
+
+Sources:
+- https://www.youtube.com/watch?v=HoKDTa5jHvg
+(1) https://arxiv.org/pdf/1503.03585.pdf
+(2) https://arxiv.org/pdf/2006.11239
+(3) https://arxiv.org/pdf/2102.09672.pdf
+(4) https://arxiv.org/pdf/2105.05233.pdf
+
+(1) The essential idea, inspired by non-equilibrium statistical physics, is to systematically and slowly destroy structure in a data distribution through an iterative forward diffusion process. We then learn a reverse diffusion process that restores structure in data, yielding a highly flexible and tractable generative model of the data. 
+
+Let's break this statement down: 1. During the forward diffusion process: Apply noise (sampled from normal distribution) to image in an iterative way until pure noise (that follows the noise distribution aka normal distribution); 2. During the reverse diffusion process: Train a neural network for removing noise in an iterative way. Then, we can give the model an image that consists of random noise (from a normal distribution) and let the model gradually remove the noise until an image is generated (that could be part of the training dataset). 
+
+Why iterative/step-by-step? Learning in this framework involves estimating small per-turbations to a diffusion process. Estimating small perturbations is more tractable than explicitly describing the full distribution with a single, non-analytically-normalizable, potential function. Basically, modeling the distribution directly wouldn't be tractable and lead to worse outcomes.
+
+(2) What are the in-/outputs of the neural network? The input of the neural network is a noised image. The output of the neural network is the mean of the noise. The mean of the noice represents the noice of the image, which can then be substracted from the noised image to get a less noised image. The standard deviation is fixed. So, this doesn't need to be predicted. In (3), the standard deviation of the noise is learned too. 
+
+Important note about the iterative approach: in (2), they apply a linear schedule: add same amount of noise to image in every time step. This approach is sub-optimal as the last couple of time steps already seem like complete noise (redundant) and the information might be destroyed too fast. Hence, in (3), they apply a cosine schedule: this approach solves both problems from the linear schedule. 
+
+What does the architecture of the neural network look like? In (2), they applied U-net-like architecture: 1. The image is downsampled using Resnet- and Downsample-blocks; 2. Bottleneck-block; 3. Upsample to original size using Resnet- and Upsample-blocks. Also, attention blocks are added at certain resolutions (before and after bottleneck-block?) and skip connections between layers of the same spatial resolutions. The model looks the same at each time step. However, different amount of noise is added at different time steps (remember the note about the schedules). A sinusoidal embedding is added to each residual block to inform the model about the time step. The model can then remove different amount of noise at different time steps. In (3), many improvements are added: 1. Increase depth and decrease width; 2. Add more attention blocks and increase attention heads; 3. Use BigGAN residual blocks; 4. Add addaptive group normalization. In (4), classifier guidance is added. 
+
+This should give a basic intuition of how diffusion models work. Now, let's get into the math. 
+
+Some basic notation: x_t = image at timestep t (x_O is the original image and x_T is the final image (that follows isotropic gaussian) where T depends on the paper); q(x_t|x_(t-1)) = the forward diffusion process: takes an image x_(t-1) and returns an image with noise added x_t; p(x_(t-1)|x_t) = the reverse diffusion process: takes an image x_t and returns a sample/image with noise removed x_(t-1). 
+
+<img width="1264" alt="Screenshot 2025-05-01 at 11 55 41" src="https://github.com/user-attachments/assets/321b6b69-b83e-4ee2-a330-25606c3c1229" />
+
+
+## Guide to Stable Diffusion Models
+
 # Latent Diffusion Models
 [arXiv](https://arxiv.org/abs/2112.10752) | [BibTeX](#bibtex)
 
