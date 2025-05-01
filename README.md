@@ -2,12 +2,19 @@
 
 ## Guide to Diffusion Models
 
+<img width="630" alt="Screenshot 2025-05-01 at 15 05 37" src="https://github.com/user-attachments/assets/a1eb2246-21c6-45d4-90e0-ec68be6fad53" />
+
 Sources:
 https://www.youtube.com/watch?v=HoKDTa5jHvg
+https://www.youtube.com/watch?v=a4Yfz2FxXiY
+
 (1) https://arxiv.org/pdf/1503.03585.pdf
 (2) https://arxiv.org/pdf/2006.11239
 (3) https://arxiv.org/pdf/2102.09672.pdf
 (4) https://arxiv.org/pdf/2105.05233.pdf
+
+Another awesome source: https://github.com/diff-usion/Awesome-Diffusion-Models
+
 
 (1) The essential idea, inspired by non-equilibrium statistical physics, is to systematically and slowly destroy structure in a data distribution through an iterative forward diffusion process. We then learn a reverse diffusion process that restores structure in data, yielding a highly flexible and tractable generative model of the data. 
 
@@ -39,9 +46,57 @@ The formula for the reverse diffusion process for a single time step: the neural
 
 <img width="1160" alt="Screenshot 2025-05-01 at 12 21 47" src="https://github.com/user-attachments/assets/1f04f8bb-50c4-43d3-b4ff-86c52d5e338f" />
 
-The formula for the loss function: 
+The formula for the loss function: the negative log likelihood of the probability of x_0. There's a problem, this is difficult to calculate in practice as the probability of x_0 depends on all time steps before x_0. The solution is calcultating the variational lower bound of the objective. 
+
+This lower bound is obtained by subtracting the KL divergence between the approximate (forward) and true (reverse) distributions from the original objective. Since KL divergence is always non-negative, subtracting it guarantees the result is less than or equal to the true log-likelihood—hence a "lower bound."
+
+Because we're minimizing the negative log-likelihood, subtracting KL (i.e., maximizing the ELBO) is equivalent to adding KL divergence to the loss, helping guide the model toward a better approximation of the data distribution. 
+
+<img width="803" alt="Screenshot 2025-05-01 at 13 26 41" src="https://github.com/user-attachments/assets/700defe9-7315-45c6-9cc8-6a14ab8708f3" />
+
+However, the lower bound is still not computable since the uncomputable quantity is still in the formula. So, we need some reformulations to arrive at a better looking quantity. HERE I COULDNT FOLLOW THE VIDEO ANYMORE
+
+Let's take a look at the algorithms for training: sample image from dataset, time step from uniform distribution, and noise from normal distribution. Then, the objective is optimized using gradient descent until convergence.  
+
+<img width="658" alt="Screenshot 2025-05-01 at 13 42 08" src="https://github.com/user-attachments/assets/17417ea6-79a7-4439-9828-8d20753a2595" />
+
+Let's take a look at the algorithms for sampling: sample x_T from normal distribution. Then, iteratively use formula (see above?) to sample x_(t-1). if t=1, then we don't want to add noise (it would make the quality of the final image worse). Finally, return x_O which should be an image that could come from the dataset.  
+
+<img width="651" alt="Screenshot 2025-05-01 at 13 45 45" src="https://github.com/user-attachments/assets/0a9c96c1-f0f9-464d-9d2e-716b7805d89f" />
+
+
+To implement a diffusion model, we need a noise scheduler, a neural network and timestep encoding. 
+
+During the forward process, noise is added sequentially to the images. This markov is denoted with q and can be formulated as follows:
+
+<img width="1270" alt="Screenshot 2025-05-01 at 15 23 27" src="https://github.com/user-attachments/assets/41ef9aa0-43c1-4e37-9b8d-069ce2277b97" />
+
+The noise that is added to an image x_t depends only on the previous image x_(t-1). The noise for an image x_t is sampled with a conditional gaussian distribution where the mean depends on the previous image x_(t-1) and a fixed variance. The sequence of betas is the so-called variance schedule that described how much noise needs to be added for each of the time steps. So, the mean of the distribution for image x_t is the previous image x_(t-1) multiplied by the beta-term. The variance of the distribution for image x_t is the beta multiplied by the identity. 
+
+Some more intuition about beta: In case of large beta, the pixel distribution is wider and more shifted. When sampling from this distribution, more noise is added. Eventually, beta controls how fast we converge to a standard gaussian distribution (zero mean). The right amount of noise needs to be added such that we arrive at an isotropic gaussian distribution (zero mean and fixed variance in all directions). Noise shouldn't be added too fast/slow, there are different schedules to get this. 
+
+There's an even better way to do this, the closed-form forward process: instead of doing the forward pass sequentially, it's possible to sample the noisy version for any timestamp t. For this, the closed-form of the mean and variance need to be pre-computed based on the cumulative variance schedules. Imagine T=200 and beta (the variance schedule) is defined according to linear scheduler, introduce a new term alpha = 1-beta. By calculating the cumulative product of the alpha-terms, we get another new term alpha_overlined. This term can be used to re-write the forward process formula:
+
+<img width="1382" alt="Screenshot 2025-05-01 at 15 43 38" src="https://github.com/user-attachments/assets/f39606c4-e1d2-4654-b5b3-59218aacf5d9" />
+
+During the backward process, the U-net architecture is used. The input passes a series of convolutional and downsampling layers until a bottleneck is reached. Then, the tensors pass convolutional and upsamling layers until they have the same shape as the input. Also, residual connections, batch normalization and attention modules are added. The model takes in a noisy image and predicts the noise in the image. The output is one value per pixel which represents the mean of the gaussian distribution of the images (denoising score matching). The neural network is the same for every time step. So, the models gets timestep information using timestep embedding. 
+
+The backward process can be formulated as follows:
+
+<img width="1374" alt="Screenshot 2025-05-01 at 16 14 27" src="https://github.com/user-attachments/assets/34d9b3eb-c813-4d4a-a418-d28f1d947967" />
+
+Start in x_T with gaussian noise with a zero mean and unit variance. In a seuence, the transition from one latence to the next is predicted. The model learns the probability density of an earlier time step given the current time step. During training, randomly sample time steps (don't go through entire seqeunce). During inference, iterate through entire sequence (from pure noise x_T to final image x_O). The density p is defined by the predicted gaussian noise distribution in the image. To get the actual image of time step t-1 x_(t-1), substract the predicted noise from the image in time step t x_t. 
+
+How to consider the time step in the model? Positional embeddings are used. This is a clever way to encode discrete positional information, such as sequence steps. A positional embedding is a vector that looks different for every time step. The positional embeddings are added as additional input, besided the noisy image. 
+
+Diffusion models are optimized with the variational lower bound. The final loss can be formulated as follows:
+
+<img width="1004" alt="Screenshot 2025-05-01 at 16 21 56" src="https://github.com/user-attachments/assets/89c71387-32f6-4da3-9d2f-c1e87b84d806" />
+
+The loss is the L2-distance of the predicted noise and the actual noise in the image (see previous video for better understanding of derivations). 
 
 ## Guide to Stable Diffusion Models
+
 
 # Latent Diffusion Models
 [arXiv](https://arxiv.org/abs/2112.10752) | [BibTeX](#bibtex)
