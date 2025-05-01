@@ -35,9 +35,11 @@ Then, we can re-write the formula for the entire forward diffusion process as fo
 
 <img width="814" alt="Screenshot 2025-05-01 at 12 17 39" src="https://github.com/user-attachments/assets/abe05e98-2a70-41d2-8136-d90cc1880789" />
 
-The formula for the reverse diffusion process for a single time step: 
+The formula for the reverse diffusion process for a single time step: the neural network only needs to predict the mean. The variance is fixed according to a certain schedule and thus doesn't need to be predicted. 
 
 <img width="1160" alt="Screenshot 2025-05-01 at 12 21 47" src="https://github.com/user-attachments/assets/1f04f8bb-50c4-43d3-b4ff-86c52d5e338f" />
+
+The formula for the loss function: 
 
 ## Guide to Stable Diffusion Models
 
