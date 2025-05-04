@@ -1,8 +1,40 @@
 # Notes
 
+<img width="630" alt="Screenshot 2025-05-01 at 15 05 37" src="https://github.com/user-attachments/assets/a1eb2246-21c6-45d4-90e0-ec68be6fad53" />
+
+## Guide to Generative Adversarial Networks (GANs)
+
+Sources: https://jonathan-hui.medium.com/gan-gan-series-2d279f906e7b
+
+GAN composes of two deep networks, the generator, and the discriminator. First, we sample some noise z using a normal or uniform distribution. With z as an input, we use a generator G to create an image x (x=G(z)). So what is this magic generator G? It performs multiple transposed convolutions to upsample z to generate the image x. But a generator alone will just create random noise. Conceptually, the discriminator in GAN provides guidance to the generator on what images to create.
+
+By training with real images and generated images, GAN builds a discriminator to learn what features make images real. Then the same discriminator will provide feedback to the generator to create real images. So how is it done technically? The discriminator looks at real images (training samples) and generated images separately. It distinguishes whether the input image to the discriminator is real or generated. The output D(X) is the probability that the input x is real, i.e. P(class of input = real image).
+
+We train the discriminator just like a deep network classifier. If the input is real, we want D(x)=1. If it is generated, it should be zero. Through this process, the discriminator identifies features that contribute to real images. On the other hand, we want the generator to create images with D(x) = 1 (matching the real image). So we can train the generator by backpropagation this target value all the way back to the generator, i.e. we train the generator to create images that towards what the discriminator thinks it is real.
+
+We train both networks in alternating steps and lock them into a fierce competition to improve themselves. Eventually, the discriminator identifies the tiny difference between the real and the generated, and the generator creates images that the discriminator cannot tell the difference. The GAN model eventually converges and produces natural look images.
+
+Now, we will go through some simple equations. The discriminator outputs a value D(x) indicating the chance that x is a real image. Our objective is to maximize the chance to recognize real images as real and generated images as fake. i.e. the maximum likelihood of the observed data. To measure the loss, we use cross-entropy as in most Deep Learning: p log(q). For real image, p (the true label for real images) equals to 1. For generated images, we reverse the label (i.e. one minus label). So the objective becomes:
+
+![image](https://github.com/user-attachments/assets/422ff551-cb17-4182-a589-0fce22c9ece6)
+
+On the generator side, its objective function wants the model to generate images with the highest possible value of D(x) to fool the discriminator.
+
+![image](https://github.com/user-attachments/assets/14d881be-ce84-44c7-8f97-a9c501df6a63)
+
+We often define GAN as a minimax game which G wants to minimize V while D wants to maximize it.
+
+![image](https://github.com/user-attachments/assets/87f17112-2fc4-4623-8139-95d16f05abbd)
+
+Once both objective functions are defined, they are learned jointly by the alternating gradient descent algorithm. We fix the generator model’s parameters and perform a single iteration of gradient ascend on the discriminator using the real and the generated images. Then we switch sides. Fix the discriminator and train the generator for another single iteration. We train both networks in alternating steps until the generator produces good-quality images. The following summarizes the data flow and the gradients used for the backpropagation.
+
+![image](https://github.com/user-attachments/assets/2fc2d654-2932-4c7e-9aef-20c2d6405e44)
+
+![image](https://github.com/user-attachments/assets/9a236306-cffb-4c37-8c24-f102566b5ff1)
+
+
 ## Guide to Diffusion Models
 
-<img width="630" alt="Screenshot 2025-05-01 at 15 05 37" src="https://github.com/user-attachments/assets/a1eb2246-21c6-45d4-90e0-ec68be6fad53" />
 
 Sources:
 https://www.youtube.com/watch?v=HoKDTa5jHvg
