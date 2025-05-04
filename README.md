@@ -102,7 +102,8 @@ Some notes:
 - Diffusion models try so hard to generate every tiny detail of images—even ones humans can’t see—that they use a lot of compute unnecessarily. A method called the reweighted variational objective helps avoid this by paying less attention to the early (most noisy) stages of image generation, where fine details don't matter much.
 - The authors propose replacing the inefficient, two-stage learning process of pixel-space diffusion models with a more efficient setup: they use an autoencoder to handle perceptual compression upfront, then train the diffusion model in the resulting latent space to focus on learning high-level semantic structure, enabling faster and more scalable high-resolution image synthesis.
 - Unlike earlier methods that shrunk images a lot to save compute, LDMs use a smarter, learned compression (latent space) that keeps images meaningful but compact, allowing fast and high-quality image generation without sacrificing resolution.
-- 
+- The power of diffusion models comes from using UNet architectures, which naturally suit image data. By training with a reweighted objective that focuses more on noise levels critical to human perception, these models produce higher-quality images. In doing so, they behave like lossy compressors—preserving the key semantic and visual information while discarding imperceptible details—enabling a tunable trade-off between image quality and compression efficiency.
+- In conditional diffusion models, cross-attention allows the model to guide image generation using inputs like text. The image features act as queries, asking “what should go here?”, while the text embeddings serve as keys and values, supplying relevant semantic content. The model uses similarity between queries and keys to decide which words influence which parts of the image, allowing it to inject text-based guidance into the denoising process and produce images that match the given prompt.
 
 
 
