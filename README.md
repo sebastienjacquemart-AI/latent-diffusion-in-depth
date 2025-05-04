@@ -97,6 +97,14 @@ The loss is the L2-distance of the predicted noise and the actual noise in the i
 
 ## Guide to Stable Diffusion Models
 
+Some notes: 
+- Likelihood-based models are generative models that explicitly learn a probability distribution over data by maximizing the likelihood of observed samples, enabling stable training and better coverage of data modes.
+- Diffusion models try so hard to generate every tiny detail of images—even ones humans can’t see—that they use a lot of compute unnecessarily. A method called the reweighted variational objective helps avoid this by paying less attention to the early (most noisy) stages of image generation, where fine details don't matter much.
+- The authors propose replacing the inefficient, two-stage learning process of pixel-space diffusion models with a more efficient setup: they use an autoencoder to handle perceptual compression upfront, then train the diffusion model in the resulting latent space to focus on learning high-level semantic structure, enabling faster and more scalable high-resolution image synthesis.
+- Unlike earlier methods that shrunk images a lot to save compute, LDMs use a smarter, learned compression (latent space) that keeps images meaningful but compact, allowing fast and high-quality image generation without sacrificing resolution.
+- 
+
+
 
 # Latent Diffusion Models
 [arXiv](https://arxiv.org/abs/2112.10752) | [BibTeX](#bibtex)
