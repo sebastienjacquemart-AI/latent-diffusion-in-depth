@@ -67,8 +67,25 @@ So how do we actually produce these smooth interpolations we speak of? From here
 
 Sources: https://ljvmiranda921.github.io/notebook/2021/08/08/clip-vqgan/
 
-Vector Quantized Generative Adversarial Network
+There are two complementary perception techniques: an interesting view of perception that allows us to model long-range dependencies by representing images discretely; and— a pixel-based approach to learn local interactions and visual parts. VQGAN was able to combine both of them. It can learn not only the (1) visual parts of an image using a convolutional neural network, but also the (2) relationship (read: long-range dependencies) between these parts using a transformer network. 
 
+The logical next step is to combine these approaches together. One way is to directly feed the feature map into a Transformer. We can flatten the pixels of an image into a sequence and use that as input. However, they encountered a limitation in the transformer network: its computation scales quadratically with the length of the input sequence. A 224 x 224 px image will have a length of 2242×3, way above the capacity of a GPU. As a result, they reduced the context by downsampling the 224-px image to 32-, 48-, and 64 pixel dimensions. The reason Transformers scale quadratically is because of its attention mechanism: it computes for the pairwise inner product between each pair of the tokens. Through this method, it can learn about the long-range dependencies between tokens.
+
+Nevertheless, we see a two-stage approach common across all works.
+
+<img width="740" alt="Screenshot 2025-05-04 at 17 45 02" src="https://github.com/user-attachments/assets/3adf8b07-c5ee-4972-9b6a-8fb807b537ee" />
+
+VQGAN employs the same two-stage structure by learning an intermediary representation before feeding it to a transformer. However, instead of downsampling the image, VQGAN uses a codebook to represent visual parts. The authors did not model the image from a pixel-level directly, but instead from the codewords of the learned codebook. The codebook is generated through a process called vector quantization (VQ), i.e., the “VQ” part of “VQGAN.” Vector quantization is a signal processing technique for encoding vectors. It represents all visual parts found in the convolutional step in a quantized form, making it less computationally expensive once passed to a transformer network. One can think of vector quantization as a process of dividing vectors into groups that have approximately the same number of points closest to them. Each group is then represented by a centroid (codeword), usually obtained via k-means or any other clustering algorithm. In the end, one learns a dictionary of centroids (codebook) and their corresponding members.
+
+We’ll replace the simple convolutional neural network with a generative adversarial network. The layers still perform a convolution operation, but with a GAN it synthesizes more distinct visual parts. Instead of having a separate process for vector quantization, VQGAN will learn the codebook right away. Learning the feature map of visual parts happens inside the GAN. It’s still the same two-stage approach:
+
+<img width="751" alt="Screenshot 2025-05-04 at 17 54 53" src="https://github.com/user-attachments/assets/83a0ed8a-6645-4c8a-99d2-2d5e005e769c" />
+
+If we look under the hood of VQGAN’s generator N, we’ll see that it follows an encoder-decoder architecture. Vector quantization also happens between the encoder and decoder networks. After encoding the input x into ^z, i.e., ^z=E(x), we perform an element-wise operation q to obtain a discrete version of the input. So instead of reconstructing from the encoder output ^z, we do it from its quantized form zq. 
+
+Finally, training VQGAN to obtain the optimal compression model Q⋆ becomes a matter of combining the two losses from the autoencoder and the GAN. When put together, we obtain the discrete capabilities of VQ, the rich expressivity of GANs, and the encoding capabilities of the autoencoder. This allows us to obtain richer and more distinct visual parts than a standard convolutional neural network.
+
+We’re only interested with the codebook Z because it provides a discrete representation of our visual parts that can readily be fed to a transformer. To do so, we represent the images in terms of the codebook-indices of their embeddings. Now that we have our sequences, we can just train our transformer to predict the next index of an encoded sequence. Lastly, when generating high-resolution images, the authors restricted the context via a sliding-window. This means that when generating each patch, it obtains information only from its neighbors. It’s a nice “trick” to improve resource-efficiency when using transformers.
 
 ## Guide to Diffusion Models
 
