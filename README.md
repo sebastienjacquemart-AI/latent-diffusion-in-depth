@@ -2,6 +2,9 @@
 
 <img width="630" alt="Screenshot 2025-05-01 at 15 05 37" src="https://github.com/user-attachments/assets/a1eb2246-21c6-45d4-90e0-ec68be6fad53" />
 
+![image](https://github.com/user-attachments/assets/19f6fff3-14af-4c78-9b95-bac2651aacbe)
+
+
 ## Guide to Generative Adversarial Networks (GANs)
 
 Sources: https://jonathan-hui.medium.com/gan-gan-series-2d279f906e7b
@@ -59,6 +62,12 @@ Intuitively, this loss encourages the encoder to distribute all encodings (for a
 So how do we actually produce these smooth interpolations we speak of? From here on out, it’s simple vector arithmetic in the latent space. For example, if you wish to generate a new sample halfway between two samples, just find the difference between their mean (μ) vectors, and add half the difference to the original, and then simply decode it.
 
 ![image](https://github.com/user-attachments/assets/a29d1a29-3711-43f4-a470-64fa8cf315ed)
+
+## Guide to Two-Stage Image Synthesis
+
+Sources: https://ljvmiranda921.github.io/notebook/2021/08/08/clip-vqgan/
+
+Vector Quantized Generative Adversarial Network
 
 
 ## Guide to Diffusion Models
