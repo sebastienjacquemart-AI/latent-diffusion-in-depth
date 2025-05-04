@@ -2,8 +2,6 @@
 
 <img width="630" alt="Screenshot 2025-05-01 at 15 05 37" src="https://github.com/user-attachments/assets/a1eb2246-21c6-45d4-90e0-ec68be6fad53" />
 
-![image](https://github.com/user-attachments/assets/19f6fff3-14af-4c78-9b95-bac2651aacbe)
-
 
 ## Guide to Generative Adversarial Networks (GANs)
 
